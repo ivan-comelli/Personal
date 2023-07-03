@@ -1,0 +1,72 @@
+@use '../public/font/chillax/css/chillax.css';
+
+$background: #D6D6C6;
+$on-background: #02283A;
+
+$font-family-body: 'chillax-light';
+$font-size-base: 12px;
+$font-family-headline: 'chillax-medium';
+$font-size-headline: 20px;
+$font-family-headline-2: 'chillax-regular';
+$font-family-caption: 'chillax-medium';
+$font-size-caption: 8px;
+
+$spacing-xsmall: 4px;
+$spacing-small: 6px;
+$spacing-medium: 10px;
+$spacing-large: 16px;
+$spacing-xlarge: 26px;
+
+$border-radius: 4px;
+$border-weight: 0.25px;
+
+.Headline {
+    font-family: $font-family-headline;
+    font-size: $font-size-headline;
+}
+
+.Headline-2 {
+    font-family: $font-family-headline-2;
+    font-size: $font-size-base;
+}
+
+.caption {
+    font-family: $font-family-caption;
+    font-size: $font-size-caption;
+}
+
+.paper-input {
+    background: none;
+    border: none;
+    width: 100%;
+    font-family: $font-family-caption;
+    font-size: $font-size-caption;
+    color: $on-background;
+
+    &:focus {
+        outline: none; 
+    }
+}
+
+.fill-wrapper {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    padding-top: $spacing-large;
+}
+
+body {
+    font-family: $font-family-body;
+    font-size: $font-size-base;
+    color: $on-background;
+}
+
+.App {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2em;
+}
+
+
+
