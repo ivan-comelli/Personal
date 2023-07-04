@@ -1,7 +1,7 @@
 import './App.scss';
 import React, { useState, useEffect } from "react";
 import WorkPlanBlank from './components/WorkPlanBlank'
-import { WorkPlanInterface } from './interfaces/WorkPlan';
+import { WorkPlanInterface } from '../server/interfaces/WorkPlan';
 
 
 

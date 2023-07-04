@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { WorkPlanInterface, TasksType, ToolsType, MaterialsType } from '../../interfaces/WorkPlan';
+import { WorkPlanInterface, TasksType, ToolsType, MaterialsType } from '../../../server/interfaces/WorkPlan';
 import "./style.scss";
 
 interface WorkPlanBlankInterface extends WorkPlanInterface {

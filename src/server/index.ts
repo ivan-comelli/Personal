@@ -1,8 +1,10 @@
-import workPlanRoutes from './src/routes/workPlan';
+import workPlanRoutes from './routes/workPlan';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import path from 'path';
 import express from 'express';
 
+const buildDir = path.join(process.cwd() + "/build");
 const app = express();
 const port = 3001; // Elige el puerto que desees utilizar
 
@@ -16,7 +18,7 @@ app.use(cors({
 app.use(workPlanRoutes);
 
 // Configura el servidor para servir los archivos estáticos de la aplicación CRA
-app.use(express.static('build'));
+app.use(express.static(buildDir));
 
 // Inicia el servidor
 app.listen(port, () => {
