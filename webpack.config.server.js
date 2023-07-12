@@ -1,7 +1,7 @@
 const path = require("path");
 const nodeExternals = require("webpack-node-externals");
 
-const entry = { server: "./src/server/index.ts" };
+const entry = { index: "./src/server/index.ts" };
 
 module.exports = {
   mode: process.env.NODE_ENV ? process.env.NODE_ENV : "development",
@@ -9,13 +9,13 @@ module.exports = {
   devtool: "inline-source-map",
   entry: entry,
   output: {
-    path: path.resolve(__dirname, "build"),
+    path: path.resolve(__dirname, "api"),
     filename: "[name].js",
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
   },
-    // don't compile node_modules
+  // don't compile node_modules
   externals: [nodeExternals()],
   module: {
     rules: [
@@ -31,6 +31,6 @@ module.exports = {
           },
         ],
       },
-    ],
-  },
+    ]
+  }
 };

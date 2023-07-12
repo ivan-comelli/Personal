@@ -4,12 +4,12 @@ import { WorkPlanModelInterface, TasksType, ToolsType, MaterialsType } from '../
 
 export class WorkPlanModel extends Model<WorkPlanModelInterface> implements WorkPlanModelInterface {
     public id!: number;
-    public workName!: string;
-    public totalTime!: number;
-    public workDays!: number;
-    public fidelityPercentage!: number;
-    public startDate!: string;
-    public expirationDate!: string;
+    public workname!: string;
+    public totaltime!: number;
+    public workdays!: number;
+    public fidelitypercentage!: number;
+    public startdate!: string;
+    public expirationdate!: string;
     public note!: string;
     public getTasks!: HasManyGetAssociationsMixin<TaskModel>;
     public getTools!: HasManyGetAssociationsMixin<ToolModel>;
@@ -25,7 +25,7 @@ export class MaterialModel extends Model<MaterialsType> implements MaterialsType
     public name!: string | undefined;
     public fix!: boolean;
     public index!: number;
-    public workPlanId!: number;
+    public workplanid!: number;
 }
 
 export class ToolModel extends Model<ToolsType> implements ToolsType {
@@ -34,7 +34,7 @@ export class ToolModel extends Model<ToolsType> implements ToolsType {
     public breakpoint!: boolean;
     public fix!: boolean;
     public index!: number;
-    public workPlanId!: number;
+    public workplanid!: number;
 }
 
 export class TaskModel extends Model<TasksType> implements TasksType {
@@ -42,7 +42,7 @@ export class TaskModel extends Model<TasksType> implements TasksType {
     public title!: string | undefined;
     public breakpoint!: boolean;
     public index!: number;
-    public workPlanId!: number;
+    public workplanid!: number;
 }
 
 WorkPlanModel.init(
@@ -52,27 +52,27 @@ WorkPlanModel.init(
             primaryKey: true,
             autoIncrement: true
         },
-        workName: {
+        workname: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        totalTime: {
+        totaltime: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        workDays: {
+        workdays: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        fidelityPercentage: {
+        fidelitypercentage: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        startDate: {
+        startdate: {
             type: DataTypes.DATEONLY,
             allowNull: false,
         },
-        expirationDate: {
+        expirationdate: {
             type: DataTypes.DATEONLY,
             allowNull: false,
         },
@@ -82,7 +82,7 @@ WorkPlanModel.init(
         }
     },
     {
-        tableName: "WorkPlan",
+        tableName: "workplan",
         timestamps: false,
         sequelize
     }
@@ -107,17 +107,17 @@ TaskModel.init(
             type: DataTypes.INTEGER,
             allowNull: true,    
         },
-        workPlanId: {
+        workplanid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-              model: 'WorkPlan',
+              model: 'workplan',
               key: 'id'
             } 
         }
     },
     {
-        tableName: "Task",
+        tableName: "task",
         timestamps: false,
         sequelize
     }
@@ -146,17 +146,17 @@ ToolModel.init(
             type: DataTypes.INTEGER,
             allowNull: true,    
         },
-        workPlanId: {
+        workplanid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-              model: 'WorkPlan',
+              model: 'workplan',
               key: 'id'
             } 
         }
     },
     {
-        tableName: "Tool",
+        tableName: "tool",
         timestamps: false,
         sequelize
     }
@@ -181,17 +181,17 @@ MaterialModel.init(
             type: DataTypes.INTEGER,
             allowNull: true,    
         },
-        workPlanId: {
+        workplanid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-              model: 'WorkPlan',
+              model: 'workplan',
               key: 'id'
             }
         }
     },
     {
-        tableName: "Material",
+        tableName: "material",
         timestamps: false,
         sequelize
     }
@@ -199,22 +199,22 @@ MaterialModel.init(
 
 WorkPlanModel.hasMany(TaskModel, {
     sourceKey: 'id',
-    foreignKey: 'workPlanId',
+    foreignKey: 'workplanid',
     as: 'tasks'
 });
 WorkPlanModel.hasMany(ToolModel, {
     sourceKey: 'id',
-    foreignKey: 'workPlanId',
+    foreignKey: 'workplanid',
     as: 'tools'
 });
 WorkPlanModel.hasMany(MaterialModel, {
     sourceKey: 'id',
-    foreignKey: 'workPlanId',
+    foreignKey: 'workplanid',
     as: 'materials'
 });
 
-TaskModel.belongsTo(WorkPlanModel, { foreignKey: 'workPlanId' });
-ToolModel.belongsTo(WorkPlanModel, { foreignKey: 'workPlanId' });
-MaterialModel.belongsTo(WorkPlanModel, { foreignKey: 'workPlanId' });
+TaskModel.belongsTo(WorkPlanModel, { foreignKey: 'workplanid' });
+ToolModel.belongsTo(WorkPlanModel, { foreignKey: 'workplanid' });
+MaterialModel.belongsTo(WorkPlanModel, { foreignKey: 'workplanid' });
 
 export default WorkPlanModel;

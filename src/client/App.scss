@@ -59,14 +59,11 @@ body {
     font-family: $font-family-body;
     font-size: $font-size-base;
     color: $on-background;
+    padding: 0;
+    margin: 0;
+    background: linear-gradient(180deg, #3F3434 25.18%, #291E1E 100%);
 }
 
-.App {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 2em;
-}
 
 
 

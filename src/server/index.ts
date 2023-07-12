@@ -1,26 +1,28 @@
-import workPlanRoutes from './routes/workPlan';
-import cors from 'cors';
 import bodyParser from 'body-parser';
-import path from 'path';
 import express from 'express';
+import workPlanRoutes from './routes/workPlan';
+import dotenv from 'dotenv';
 
-const buildDir = path.join(process.cwd() + "/build");
+dotenv.config({ path: '.env.local' });
+
 const app = express();
-const port = 3001; // Elige el puerto que desees utilizar
+
+// Configura el servidor para servir los archivos estáticos de la aplicación CRA
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Configura las rutas de tu API aquí
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://192.168.0.100:3000']
-}))
-app.use(workPlanRoutes);
-
-// Configura el servidor para servir los archivos estáticos de la aplicación CRA
-app.use(express.static(buildDir));
-
-// Inicia el servidor
-app.listen(port, () => {
-  console.log(`Servidor Express escuchando en el puerto ${port}`);
+// Middleware para agregar el encabezado CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
 });
+
+app.use("/api", workPlanRoutes);
+
+app.listen(process.env.REACT_APP_SERVER_PORT);
+
+export default app;

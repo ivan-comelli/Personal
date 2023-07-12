@@ -4,6 +4,8 @@ import "./style.scss";
 
 interface WorkPlanBlankInterface extends WorkPlanInterface {
   writeChange: any,
+  getNew: any,
+  onPostMode: boolean,
   loading: boolean
 }
 
@@ -15,7 +17,7 @@ type ListsType = {
   }
 }
 
-export const Box = ({writeChange, loading, ...props}: WorkPlanBlankInterface) => {
+export const Box = ({writeChange, getNew, onPostMode, loading, ...props}: WorkPlanBlankInterface) => {
   const maxLengthInput = 18;
 
   const [dataUpdated, setDataUpdated] = useState(false);
@@ -36,13 +38,13 @@ export const Box = ({writeChange, loading, ...props}: WorkPlanBlankInterface) =>
     ));
     for(let index = 0; index < 14; index++) {
       if(finalData.tasks[index] === undefined) {
-        finalData.tasks[index] = { id: undefined, title: undefined, breakpoint: false, workPlanId: initialData.id, index: index }
+        finalData.tasks[index] = { id: undefined, title: undefined, breakpoint: false, workplanid: initialData.id, index: index }
       }
       if(finalData.tools[index] === undefined) {
-        finalData.tools[index] = { id: undefined, name: undefined, breakpoint: false, fix: false, workPlanId: initialData.id, index: index }
+        finalData.tools[index] = { id: undefined, name: undefined, breakpoint: false, fix: false, workplanid: initialData.id, index: index }
       }
       if(finalData.materials[index] === undefined) {
-        finalData.materials[index] = { id: undefined, name: undefined, fix: false, workPlanId: initialData.id, index: index }
+        finalData.materials[index] = { id: undefined, name: undefined, fix: false, workplanid: initialData.id, index: index }
       }
     }
     return (finalData);
@@ -51,7 +53,7 @@ export const Box = ({writeChange, loading, ...props}: WorkPlanBlankInterface) =>
   //Timer para auto guardado
   useEffect(() => {
     let intervalId: any;
-    let lapse = 10;
+    let lapse = 2;
     const startTimer = () => {
       let seconds = 0;  
 
@@ -59,24 +61,28 @@ export const Box = ({writeChange, loading, ...props}: WorkPlanBlankInterface) =>
         if (seconds > lapse) {
           setResetTimer(true);
           if(dataUpdated) {
-            writeChange(data).then(({ lists }: ListsType) => {
-              lists.tasks.map(item => {
-                let newData = data;
-                newData.tasks[item.index].id = item.id;
-                setData(newData);
-              })
-              lists.tools.map(item => {
-                let newData = data;
-                newData.tools[item.index].id = item.id;
-                setData(newData);
-              })
-              lists.materials.map(item => {
-                let newData = data;
-                newData.materials[item.index].id = item.id;
-                setData(newData);
-              })
-            });
-            
+            if(!onPostMode) {
+              writeChange(data).then(({ lists }: ListsType) => {
+                lists.tasks.map(item => {
+                  let newData = data;
+                  newData.tasks[item.index].id = item.id;
+                  setData(newData);
+                })
+                lists.tools.map(item => {
+                  let newData = data;
+                  newData.tools[item.index].id = item.id;
+                  setData(newData);
+                })
+                lists.materials.map(item => {
+                  let newData = data;
+                  newData.materials[item.index].id = item.id;
+                  setData(newData);
+                })
+              });
+            }
+            else {
+              getNew(data);
+            }
             setDataUpdated(false);
           }
         } else {
@@ -131,20 +137,21 @@ export const Box = ({writeChange, loading, ...props}: WorkPlanBlankInterface) =>
     let value = parseInt(event.target.value);
     switch(propStat) {
       case 'totalTime':
-        setData({...data, totalTime: value}); 
+        setData({...data, totaltime: value}); 
       break;
       case 'workDays':
-        setData({...data, workDays: value});
+        setData({...data, workdays: value});
       break;
       case 'fidelityPercentage':
-        setData({...data, fidelityPercentage: value});
+        setData({...data, fidelitypercentage: value});
       break;
     }
     setDataUpdated(true);
   }
 
-  const handleChangeNote = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setData({...data, note: event.target.value});
+  const handleChangeSimple = (event: React.ChangeEvent<HTMLInputElement>, prop: keyof WorkPlanInterface) => {
+    console.log(event.target.value)
+    setData({...data, [prop]: event.target.value});
     setDataUpdated(true);
   }
 
@@ -156,10 +163,12 @@ export const Box = ({writeChange, loading, ...props}: WorkPlanBlankInterface) =>
             <div className="fields">
               <header className="header">
                 <div className="label">
-                  <div className="name">{ data.workName }</div>
+                  <div className="name">
+                    <input className="paper-input" value={data.workname} onChange={(event) => handleChangeSimple(event, "workname" as keyof WorkPlanInterface)}/>
+                  </div>
                   <div className="lots">
                     <div className="lot-wrapper">{ 1 }</div>
-                    <div className="lot-wrapper">{ 2 }</div>
+                    <div className="lot-wrapper">{ 1 }</div>
                   </div>
                 </div>
                 <div className="date">
@@ -178,27 +187,27 @@ export const Box = ({writeChange, loading, ...props}: WorkPlanBlankInterface) =>
               <div className="content">
                 <div className="tasks flex-list">
                   {
-                    data.tasks.map((item) => (
+                    data.tasks.map((item, index) => (
                       <div className="input-wrapper">
-                        <input key={item.id} className="paper-input" type="text" value={item.title} onChange={(event) => handleChangeList({event, model: "tasks", index: item.index})} maxLength={maxLengthInput} />
+                        <input key={index} className="paper-input" type="text" value={item.title} onChange={(event) => handleChangeList({event, model: "tasks", index: item.index})} maxLength={maxLengthInput} />
                       </div>
                     ))                    
                   }
                 </div>
                 <div className="tools flex-list">
                   {
-                    data.tools.map((item) => (
+                    data.tools.map((item, index) => (
                       <div className="input-wrapper">
-                        <input key={item.id} className="paper-input" type="text" value={item.name} onChange={(event) => handleChangeList({event, model: "tools", index: item.index})} maxLength={maxLengthInput} />
+                        <input key={index} className="paper-input" type="text" value={item.name} onChange={(event) => handleChangeList({event, model: "tools", index: item.index})} maxLength={maxLengthInput} />
                       </div>
                     ))
                   }
                 </div>
                 <div className="flex-list">
                   {
-                    data.materials.map((item) => (
+                    data.materials.map((item, index) => (
                       <div className="input-wrapper">
-                        <input key={item.id} className="paper-input" type="text" value={item.name} onChange={(event) => handleChangeList({event, model: "materials", index: item.index})} maxLength={maxLengthInput} />
+                        <input key={index} className="paper-input" type="text" value={item.name} onChange={(event) => handleChangeList({event, model: "materials", index: item.index})} maxLength={maxLengthInput} />
                       </div>
                     ))
                   }
@@ -206,17 +215,17 @@ export const Box = ({writeChange, loading, ...props}: WorkPlanBlankInterface) =>
               </div>
               <div className="stats">
                 <div className="time fill-wrapper">
-                  <input className="paper-input" type="text" value={data.totalTime} onChange={(event) => handleChangeStats({event, propStat: "totalTime"}) }/>
+                  <input className="paper-input" type="text" value={data.totaltime} onChange={(event) => handleChangeStats({event, propStat: "totalTime"}) }/>
                 </div>
                 <div className="journeys fill-wrapper">
-                  <input className="paper-input" type="text" value={data.workDays} onChange={(event) => handleChangeStats({event, propStat: "workDays"}) }/>
+                  <input className="paper-input" type="text" value={data.workdays} onChange={(event) => handleChangeStats({event, propStat: "workDays"}) }/>
                 </div>
                 <div className="fidelity fill-wrapper">
-                  <input className="paper-input" type="text" value={data.fidelityPercentage} onChange={(event) => handleChangeStats({event, propStat: "fidelityPercentage"}) }/>
+                  <input className="paper-input" type="text" value={data.fidelitypercentage} onChange={(event) => handleChangeStats({event, propStat: "fidelityPercentage"}) }/>
                 </div>
               </div>
               <div className="notes">
-                <input className="paper-input text-area" type="text" value={data.note} onChange={ handleChangeNote }/>
+                <input className="paper-input text-area" type="text" value={data.note} onChange={ (event) => handleChangeSimple(event, "note" as keyof WorkPlanInterface) }/>
               </div>
             </div>
         )}
