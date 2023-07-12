@@ -5,12 +5,13 @@ export interface WorkPlanInterface extends WorkPlanModelInterface{
 }
 
 export interface WorkPlanModelInterface {
-    id: number,
-    workName: string,
-    startDate: string,expirationDate: string,
-    totalTime: number,
-    workDays: number,
-    fidelityPercentage: number,
+    id: number | undefined,
+    workname: string,
+    startdate: string,
+    expirationdate: string,
+    totaltime: number,
+    workdays: number,
+    fidelitypercentage: number,
     note: string,
 }
 
@@ -19,8 +20,8 @@ export type TasksType = {
     id: number | undefined,
     title: string | undefined,
     breakpoint: boolean,
-    index: number,
-    workPlanId: number
+    index: number, 
+    workplanid: number | undefined
 }
 
 export type ToolsType = {
@@ -29,7 +30,7 @@ export type ToolsType = {
     breakpoint: boolean,
     fix: boolean,
     index: number,
-    workPlanId: number
+    workplanid: number | undefined
 }
 
 export type MaterialsType = {
@@ -37,5 +38,5 @@ export type MaterialsType = {
     name: string | undefined,
     fix: boolean,
     index: number,
-    workPlanId: number
+    workplanid: number | undefined
 }

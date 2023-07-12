@@ -1,34 +1,115 @@
-import express, { Router } from 'express';
-import { WorkPlanInterface, TasksType, ToolsType, MaterialsType } from '../interfaces/WorkPlan';
-import { Request, Response } from 'express';
+import { WorkPlanInterface, WorkPlanModelInterface, TasksType, ToolsType, MaterialsType } from '../interfaces/WorkPlan';
+import { Request, Response, Router } from 'express';
 import { WorkPlanModel, TaskModel, ToolModel, MaterialModel } from '../db/models/WorkPlan';
+import { useState } from 'react';
 
 
 const router = Router();
 
 // Obtener todos los usuarios
-router.get('/api/planes-de-trabajo', async (req: Request, res: Response) => {
+router.get('/planes-de-trabajo', async (req: Request, res: Response) => {
   try {
     const plan = await WorkPlanModel.findAll({
       include: [{model: TaskModel, as: 'tasks'}, {model: ToolModel, as: 'tools'}, {model: MaterialModel, as: 'materials'}]
     });
     res.json(plan);
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los usuarios' });
+    res.status(500).json({ error: 'Error al obtener los planes' });
   }
 });
 
-router.put('/api/planes-de-trabajo/:id', async (req: Request, res: Response) => {
+router.post('/planes-de-trabajo', async (req: Request, res: Response) => {
   const {
-    id, workName, workDays, totalTime, fidelityPercentage, note, tasks, tools, materials
+    id, workname, workdays, totaltime, fidelitypercentage, startdate, expirationdate, note, tasks, tools, materials
   }: WorkPlanInterface = req.body; 
-  const workPlanId: string = req.params.id;
+  const workPlan: WorkPlanModelInterface = { id: undefined, workname, workdays, totaltime, fidelitypercentage, note, startdate, expirationdate };
   const newTasks: Array<TasksType> = [];
   const newTools: Array<ToolsType> = [];
   const newMaterials: Array<MaterialsType> = []; 
 
   try {
-    const plan = await WorkPlanModel.findByPk(workPlanId, {
+    const newWorkPlan = await WorkPlanModel.create(workPlan).then(res => {
+      let workPlanId: number = res.id;
+      // TASKS   TASKS   TASKS   TASKS   TASKS   TASKS   TASKS   TASKS   TASKS   TASKS
+      (tasks.map(async (item) => {
+        try {
+          const newTask = await TaskModel.create({
+            title: item.title,
+            breakpoint: false,
+            workplanid: workPlanId,
+            index: item.index
+          });
+          newTasks.push({
+            ...newTask.dataValues,
+            index: item.index
+          });
+          console.log('Tarea creada:', newTask.toJSON());
+        }
+        catch (error) {
+          console.error('Error al crear la tarea:', error);
+        }
+      }));
+
+      // Tools   Tools   Tools   Tools   Tools   Tools   Tools   Tools   Tools   Tools
+      (tools.map(async (item) => {
+        try {
+          const newTool = await ToolModel.create({
+            name: item.name,
+            breakpoint: false,
+            fix: false,
+            index: item.index,
+            workplanid: workPlanId
+          });
+          newTools.push({
+            ...newTool.dataValues,
+            index: item.index
+          });
+          console.log('Herramienta creada:', newTool.toJSON());
+        }
+        catch (error) {
+          console.error('Error al crear la herramienta:', error);
+        }
+      }));
+
+      // MATERIALS   MATERIALS   MATERIALS   MATERIALS   MATERIALS   MATERIALS   MATERIALS
+      (materials.map(async (item, index) => {
+        try {
+          const newMaterial = await MaterialModel.create({
+            name: item.name,
+            fix: false,
+            index: item.index,
+            workplanid: workPlanId
+          });
+          newMaterials.push({
+            ...newMaterial.dataValues,
+            index: index
+          });
+          console.log('Material creado:', newMaterial.toJSON());
+        }
+        catch (error) {
+          console.error('Error al crear el material:', error);
+        }
+      }));
+    });
+
+    return res.status(200).json({ message: 'Plan de trabajo actualizado correctamente', lists: {tasks: newTasks, tools: newTools, materials: newMaterials}});
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error al actualizar el plan de trabajo' });
+  }
+});
+
+router.put('/planes-de-trabajo/:id', async (req: Request, res: Response) => {
+  const {
+    id, workname, workdays, totaltime, fidelitypercentage, note, tasks, tools, materials
+  }: WorkPlanInterface = req.body; 
+  const workplanid: string = req.params.id;
+  const newTasks: Array<TasksType> = [];
+  const newTools: Array<ToolsType> = [];
+  const newMaterials: Array<MaterialsType> = []; 
+
+  try {
+    const plan = await WorkPlanModel.findByPk(workplanid, {
       include: [{model: TaskModel, as: 'tasks'}, {model: ToolModel, as: 'tools'}, {model: MaterialModel, as: 'materials'}]
     });
     
@@ -36,19 +117,19 @@ router.put('/api/planes-de-trabajo/:id', async (req: Request, res: Response) => 
       return res.status(404).json({ message: 'Plan de trabajo no encontrado' });
     }
     
+    workname && (plan.set("workname", workname));
+    plan.set("totaltime", totaltime);
+    plan.set("workdays", workdays);
+    plan.set("fidelitypercentage", fidelitypercentage);
+    plan.set("note", note);
     // TASKS   TASKS   TASKS   TASKS   TASKS   TASKS   TASKS   TASKS   TASKS   TASKS
-    workName && (plan.workName = workName);
-    plan.totalTime = totalTime;
-    plan.workDays = workDays;
-    plan.fidelityPercentage = fidelityPercentage;
-    plan.note = note;
     await Promise.all (tasks.map(async (item) => {
       if (item.title && !item.id) {
         try {
           const newTask = await TaskModel.create({
             title: item.title,
             breakpoint: false,
-            workPlanId: parseInt(workPlanId),
+            workplanid: parseInt(workplanid),
             index: item.index
           });
           newTasks.push({
@@ -64,10 +145,12 @@ router.put('/api/planes-de-trabajo/:id', async (req: Request, res: Response) => 
       else if(item.title && item.id)  {
         try {
           const editTask = await TaskModel.findByPk(item.id);
-          if(editTask) {
-            editTask.title = item.title;
-            console.log('Tarea actualizada:', editTask.toJSON());
+          if (editTask) {            
+            editTask.set('title', item.title);
             await editTask.save();
+            console.log('Tarea actualizada:', editTask.toJSON());
+          } else {
+            console.log('No se encontró la tarea');
           }
         }
         catch (error) {
@@ -95,7 +178,7 @@ router.put('/api/planes-de-trabajo/:id', async (req: Request, res: Response) => 
             breakpoint: false,
             fix: false,
             index: item.index,
-            workPlanId: parseInt(workPlanId)
+            workplanid: parseInt(workplanid)
           });
           newTools.push({
             ...newTool.dataValues,
@@ -110,7 +193,7 @@ router.put('/api/planes-de-trabajo/:id', async (req: Request, res: Response) => 
       else if(item.name && item.id)  {
         try {
           const editTool = await ToolModel.findByPk(item.id) as ToolModel;
-          editTool.name = item.name;
+          editTool.set('name', item.name);
           console.log('Herramienta actualizada:', editTool.toJSON());
           await editTool.save();
         }
@@ -138,7 +221,7 @@ router.put('/api/planes-de-trabajo/:id', async (req: Request, res: Response) => 
             name: item.name,
             fix: false,
             index: item.index,
-            workPlanId: parseInt(workPlanId)
+            workplanid: parseInt(workplanid)
           });
           newMaterials.push({
             ...newMaterial.dataValues,
@@ -153,7 +236,7 @@ router.put('/api/planes-de-trabajo/:id', async (req: Request, res: Response) => 
       else if(item.name && item.id)  {
         try {
           const editMaterial = await MaterialModel.findByPk(item.id) as MaterialModel;
-          editMaterial.name = item.name;
+          editMaterial.set('name', item.name);
           console.log('Material actualizada:', editMaterial.toJSON());
           await editMaterial.save();
         }
