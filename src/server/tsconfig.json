@@ -7,7 +7,11 @@
       "module": "esnext",
       "strict": true,
       "target": "esnext",
-      "moduleResolution": "node"
+      "moduleResolution": "node",
+      "paths": {
+        "@interfaces/*": ["server/interfaces/*"],
+        "@models/*": ["server/db/models/*"]
+      }
     },
     "exclude": ["../../build", "../client"],
     "include": [".", "index.ts"]

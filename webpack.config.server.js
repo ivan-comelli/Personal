@@ -14,6 +14,10 @@ module.exports = {
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
+    alias: {
+      '@models': path.resolve(__dirname, 'src/server/db/models'),
+      '@interfaces': path.resolve(__dirname, 'src/server/interfaces'),
+    }
   },
   // don't compile node_modules
   externals: [nodeExternals()],
