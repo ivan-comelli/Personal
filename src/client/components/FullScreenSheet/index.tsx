@@ -5,8 +5,7 @@ import {ReactComponent as ChevronRight} from '../../assets/chevron-right.svg';
 import {ReactComponent as ChevronsRight} from '../../assets/chevrons-right.svg';
 import {ReactComponent as Save} from '../../assets/save.svg';
 import {ReactComponent as Repeat} from '../../assets/repeat.svg';
-import {ReactComponent as Share} from '../../assets/share-2.svg';
-import {ReactComponent as Grid} from '../../assets/grid.svg';
+import {ReactComponent as Trash} from '../../assets/trash.svg';
 import {ReactComponent as FilePlus} from '../../assets/file-plus.svg';
 
 import { Drawer as MuiDrawer, List, ListItem, ListItemIcon, ListItemText, IconButton } from '@mui/material';
@@ -16,10 +15,12 @@ import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 type Props = {
   next: any,
   previous: any,
-  getPostSheet: any,
+  setPostModeSheet: any,
   savePostSheet: any,
   listSheet: Array<{ name: string, index: number }>,
-  children: React.ReactNode;
+  stateAutoSave: boolean,
+  deleteSheet: any,
+  children: React.ReactNode
 };
 
 const drawerWidth = 240;
@@ -66,7 +67,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 
-export const Desktop = ({children, next, previous, getPostSheet, savePostSheet, listSheet}: Props) => {
+export const Desktop = ({children, next, previous, setPostModeSheet, savePostSheet, listSheet, stateAutoSave, deleteSheet}: Props) => {
   const [onEditorMode, setOnEditorMode] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
@@ -95,15 +96,7 @@ export const Desktop = ({children, next, previous, getPostSheet, savePostSheet, 
             </ListItem>
             { !isOpen && (
               <>
-                <ListItem button>
-                  <ListItemIcon>
-
-                    <Share className="icon" width="24px"  height="24px"/>
-
-                  </ListItemIcon>
-                  <ListItemText primary="Compartir" />
-                </ListItem>
-                <ListItem button onClick={ () => { savePostSheet() } }>
+                <ListItem button onClick={ () => { savePostSheet() } } disabled={stateAutoSave}>
                   <ListItemIcon>
 
                     <Save className="icon" width="24px" height="24px"/>
@@ -121,7 +114,15 @@ export const Desktop = ({children, next, previous, getPostSheet, savePostSheet, 
                 </ListItem>
               </>
             )}
-            <ListItem button onClick={ () => { getPostSheet(); setOnEditorMode(true);} }>
+            <ListItem button onClick={ deleteSheet }>
+              <ListItemIcon>
+
+              <Trash className="icon" width="24px" height="24px"/>
+
+              </ListItemIcon>
+            <ListItemText primary="Crear nuevo" />
+            </ListItem>
+            <ListItem button onClick={ () => { setPostModeSheet(); setOnEditorMode(true);} }>
               <ListItemIcon>
 
                 <FilePlus className="icon" width="24px" height="24px"/>
@@ -135,7 +136,7 @@ export const Desktop = ({children, next, previous, getPostSheet, savePostSheet, 
           <div className="explorer">
             <List>
               {
-                listSheet.map((value, index) => (
+                listSheet .map((value, index) => (
                   <ListItem key={index} button>
                     <ListItemText primary={value.name} />
                   </ListItem>

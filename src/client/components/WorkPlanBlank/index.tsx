@@ -3,10 +3,8 @@ import { WorkPlanInterface, TasksType, ToolsType, MaterialsType } from '../../..
 import "./style.scss";
 
 interface WorkPlanBlankInterface extends WorkPlanInterface {
-  writeChange: any,
-  getNew: any,
-  onPostMode: boolean,
-  loading: boolean
+  getOutNewData: any,
+  isPostMode: boolean
 }
 
 type ListsType = {
@@ -17,11 +15,8 @@ type ListsType = {
   }
 }
 
-export const Box = ({writeChange, getNew, onPostMode, loading, ...props}: WorkPlanBlankInterface) => {
+export const Box = ({getOutNewData, isPostMode, ...props}: WorkPlanBlankInterface) => {
   const maxLengthInput = 18;
-
-  const [dataUpdated, setDataUpdated] = useState(false);
-  const [resetTimer, setResetTimer] = useState(false);
 
   //Inicializamos datos principales y completar listas con registros en blanco para inputs vacios.
   const [data, setData] = useState(() => {
@@ -49,60 +44,14 @@ export const Box = ({writeChange, getNew, onPostMode, loading, ...props}: WorkPl
     }
     return (finalData);
   });
+  const [onChangeData, setOnChangeData] = useState<boolean> (false);
 
-  //Timer para auto guardado
   useEffect(() => {
-    let intervalId: any;
-    let lapse = 2;
-    const startTimer = () => {
-      let seconds = 0;  
-
-      intervalId = setInterval(() => {
-        if (seconds > lapse) {
-          setResetTimer(true);
-          if(dataUpdated) {
-            if(!onPostMode) {
-              writeChange(data).then(({ lists }: ListsType) => {
-                lists.tasks.map(item => {
-                  let newData = data;
-                  newData.tasks[item.index].id = item.id;
-                  setData(newData);
-                })
-                lists.tools.map(item => {
-                  let newData = data;
-                  newData.tools[item.index].id = item.id;
-                  setData(newData);
-                })
-                lists.materials.map(item => {
-                  let newData = data;
-                  newData.materials[item.index].id = item.id;
-                  setData(newData);
-                })
-              });
-            }
-            else {
-              getNew(data);
-            }
-            setDataUpdated(false);
-          }
-        } else {
-          seconds++;
-        }
-      }, 1000);
-    };
-  
-    if (resetTimer) {
-      clearInterval(intervalId);
-      startTimer();
-      setResetTimer(false);
-    } else {
-      startTimer();
+    if(onChangeData == true) {
+      setOnChangeData(false);
+      getOutNewData(data);
     }
-  
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [resetTimer]);
+  }, [onChangeData, data]);
 
   type handleChangeListType = {
     event: React.ChangeEvent<HTMLInputElement>,
@@ -112,20 +61,21 @@ export const Box = ({writeChange, getNew, onPostMode, loading, ...props}: WorkPl
 
   const handleChangeList = ({event, model, index}: handleChangeListType) => {
     let newData = {...data};
+    let newValue = event.target.value === "" ? undefined : event.target.value;
     switch(model) {
       case 'tasks':
-        newData.tasks[index].title = event.target.value;
+        newData.tasks[index].title = newValue;
       break;
       case 'tools':
-        newData.tools[index].name = event.target.value;
+        newData.tools[index].name = newValue;
       break;
       case 'materials':
-        newData.materials[index].name = event.target.value;
+        newData.materials[index].name = newValue;
       break;
     }
-     
+
+    setOnChangeData(true);
     setData(newData);
-    setDataUpdated(true);
   };
 
   type handleChangeStatsType = {
@@ -138,28 +88,29 @@ export const Box = ({writeChange, getNew, onPostMode, loading, ...props}: WorkPl
     switch(propStat) {
       case 'totalTime':
         setData({...data, totaltime: value}); 
+        setOnChangeData(true);
       break;
       case 'workDays':
         setData({...data, workdays: value});
+        setOnChangeData(true);
       break;
       case 'fidelityPercentage':
         setData({...data, fidelitypercentage: value});
+        setOnChangeData(true);
       break;
     }
-    setDataUpdated(true);
   }
 
-  const handleChangeSimple = (event: React.ChangeEvent<HTMLInputElement>, prop: keyof WorkPlanInterface) => {
-    console.log(event.target.value)
+  const handleChangeSimple = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement> , prop: keyof WorkPlanInterface) => {
     setData({...data, [prop]: event.target.value});
-    setDataUpdated(true);
+    setOnChangeData(true);
   }
 
   return (
     <div className="box">
       <div className="form">
         {
-          !loading && (
+          data && (
             <div className="fields">
               <header className="header">
                 <div className="label">
@@ -225,7 +176,7 @@ export const Box = ({writeChange, getNew, onPostMode, loading, ...props}: WorkPl
                 </div>
               </div>
               <div className="notes">
-                <input className="paper-input text-area" type="text" value={data.note} onChange={ (event) => handleChangeSimple(event, "note" as keyof WorkPlanInterface) }/>
+                <textarea className="paper-input text-area" rows={6} value={data.note} onChange={ (event) => handleChangeSimple(event, "note" as keyof WorkPlanInterface) }/>
               </div>
             </div>
         )}
